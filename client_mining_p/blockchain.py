@@ -83,36 +83,36 @@ class Blockchain(object):
     def last_block(self):
         return self.chain[-1]
 
-    def proof_of_work(self, block):
-        """
-        Simple Proof of Work Algorithm
-        Stringify the block and look for a proof.
-        Loop through possibilities, checking each one against `valid_proof`
-        in an effort to find a number that is a valid proof
-        :return: A valid proof for the provided block
-        """
-        block_string = json.dumps(self.last_block, sort_keys=True)
-        proof = 0
-        while self.valid_proof(block_string, proof) is False:
-            proof += 1
-        return proof
+    # def proof_of_work(self, block):
+    #     """
+    #     Simple Proof of Work Algorithm
+    #     Stringify the block and look for a proof.
+    #     Loop through possibilities, checking each one against `valid_proof`
+    #     in an effort to find a number that is a valid proof
+    #     :return: A valid proof for the provided block
+    #     """
+    #     block_string = json.dumps(self.last_block, sort_keys=True)
+    #     proof = 0
+    #     while self.valid_proof(block_string, proof) is False:
+    #         proof += 1
+    #     return proof
 
-    @staticmethod
-    def valid_proof(block_string, proof):
-        """
-        Validates the Proof:  Does hash(block_string, proof) contain 3
-        leading zeroes?  Return true if the proof is valid
-        :param block_string: <string> The stringified block to use to
-        check in combination with `proof`
-        :param proof: <int?> The value that when combined with the
-        stringified previous block results in a hash that has the
-        correct number of leading zeroes.
-        :return: True if the resulting hash is a valid proof, False otherwise
-        """
-        guess = f'{block_string}{proof}'.encode()
-        guess_hash = hashlib.sha256(guess).hexdigest()
+    # @staticmethod
+    # def valid_proof(block_string, proof):
+    #     """
+    #     Validates the Proof:  Does hash(block_string, proof) contain 3
+    #     leading zeroes?  Return true if the proof is valid
+    #     :param block_string: <string> The stringified block to use to
+    #     check in combination with `proof`
+    #     :param proof: <int?> The value that when combined with the
+    #     stringified previous block results in a hash that has the
+    #     correct number of leading zeroes.
+    #     :return: True if the resulting hash is a valid proof, False otherwise
+    #     """
+    #     guess = f'{block_string}{proof}'.encode()
+    #     guess_hash = hashlib.sha256(guess).hexdigest()
 
-        return guess_hash[:DIFFICULTY] == "0" * DIFFICULTY
+    #     return guess_hash[:DIFFICULTY] == "0" * DIFFICULTY
 
 
 # Instantiate our Node
@@ -125,20 +125,33 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
-@app.route('/mine', methods=['GET'])
+# @app.route('/mine', methods=['POST', 'GET'])
+@app.route('/mine', methods=['POST'])
 def mine():
     # Run the proof of work algorithm to get the next proof
-    proof = blockchain.proof_of_work(blockchain.last_block)
-    # Forge the new Block by adding it to the chain with the proof
-    previous_hash = blockchain.hash(blockchain.last_block)
-    new_block = blockchain.new_block(proof, previous_hash)
+    # proof = blockchain.proof_of_work(blockchain.last_block)
+    # # Forge the new Block by adding it to the chain with the proof
+    # previous_hash = blockchain.hash(blockchain.last_block)
+    # new_block = blockchain.new_block(proof, previous_hash)
+    data = request.get_json()
+    print("data", data)
 
-    response = {
-        # TODO: Send a JSON response with the new block
-        'block': new_block
-    }
+    if data.proof and data.id:
+        response = {
+            'message': 'Success!'
+        }
+        return jsonify(response), 200
+    else:
+        response = {
+            'message': 'Failure! proof and/or id are not present'
+        }
+        return jsonify(response), 400
+    # response = {
+    #     # TODO: Send a JSON response with the new block
+    #     'block': new_block
+    # }
 
-    return jsonify(response), 200
+    # return jsonify(response), 200
 
 
 @app.route('/chain', methods=['GET'])
@@ -150,6 +163,14 @@ def full_chain():
     }
     return jsonify(response), 200
 
+@app.route('/last_block', methods=['GET'])
+def last_block_fn():
+    the_last_block = blockchain.last_block
+    response = {
+        'last block': the_last_block
+    }
+    
+    return jsonify(response), 200
 
 # Run the program on port 5000
 if __name__ == '__main__':
