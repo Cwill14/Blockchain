@@ -135,17 +135,25 @@ def mine():
     # new_block = blockchain.new_block(proof, previous_hash)
     data = request.get_json()
     print("data", data)
+    required = ['proof', 'id']
 
-    if data.proof and data.id:
+    if not all(i in data for i in required):
         response = {
-            'message': 'Success!'
-        }
-        return jsonify(response), 200
-    else:
-        response = {
-            'message': 'Failure! proof and/or id are not present'
+            'message': 'data missing'
         }
         return jsonify(response), 400
+    else:
+        return jsonify({'message': 'success'}), 200
+    # if data.proof and data.id:
+    #     response = {
+    #         'message': 'Success!'
+    #     }
+    #     return jsonify(response), 200
+    # else:
+    #     response = {
+    #         'message': 'Failure! proof and/or id are not present'
+    #     }
+    #     return jsonify(response), 400
     # response = {
     #     # TODO: Send a JSON response with the new block
     #     'block': new_block

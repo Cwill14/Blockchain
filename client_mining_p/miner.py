@@ -5,6 +5,7 @@ import sys
 import json
 
 DIFFICULTY = 6
+coins = 0
 
 def proof_of_work(block):
     """
@@ -51,6 +52,7 @@ if __name__ == '__main__':
     id = f.read()
     print("ID is", id)
     f.close()
+    print(f"Number of coins: {coins}")
 
     # Run forever until interrupted
     while True:
@@ -66,17 +68,22 @@ if __name__ == '__main__':
 
         # TODO: Get the block from `data` and use it to look for a new proof
         print("proof_of_work starting")
-        new_proof = proof_of_work(data)
+        new_proof = proof_of_work(data.get('last_block'))
         print("proof_of_work finished")
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
-
+        # print(f"post_data: {post_data}")
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
-        print(data.message)
+        # print(f"data.get('message): {data.get('message')}")
 
         # TODO: If the server responds with a 'message' 'New Block Forged'
         # add 1 to the number of coins mined and print it.  Otherwise,
         # print the message from the server.
-        pass
+        if str(data.get('message')) == "success":
+            coins += 1
+            print(f"Number of coins: {coins}")
+        else:
+            print(data.get('message'))
+        
