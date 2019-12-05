@@ -97,22 +97,22 @@ class Blockchain(object):
     #         proof += 1
     #     return proof
 
-    # @staticmethod
-    # def valid_proof(block_string, proof):
-    #     """
-    #     Validates the Proof:  Does hash(block_string, proof) contain 3
-    #     leading zeroes?  Return true if the proof is valid
-    #     :param block_string: <string> The stringified block to use to
-    #     check in combination with `proof`
-    #     :param proof: <int?> The value that when combined with the
-    #     stringified previous block results in a hash that has the
-    #     correct number of leading zeroes.
-    #     :return: True if the resulting hash is a valid proof, False otherwise
-    #     """
-    #     guess = f'{block_string}{proof}'.encode()
-    #     guess_hash = hashlib.sha256(guess).hexdigest()
+    @staticmethod
+    def valid_proof(block_string, proof):
+        """
+        Validates the Proof:  Does hash(block_string, proof) contain 3
+        leading zeroes?  Return true if the proof is valid
+        :param block_string: <string> The stringified block to use to
+        check in combination with `proof`
+        :param proof: <int?> The value that when combined with the
+        stringified previous block results in a hash that has the
+        correct number of leading zeroes.
+        :return: True if the resulting hash is a valid proof, False otherwise
+        """
+        guess = f'{block_string}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
 
-    #     return guess_hash[:DIFFICULTY] == "0" * DIFFICULTY
+        return guess_hash[:DIFFICULTY] == "0" * DIFFICULTY
 
 
 # Instantiate our Node
@@ -129,37 +129,40 @@ blockchain = Blockchain()
 @app.route('/mine', methods=['POST'])
 def mine():
     # Run the proof of work algorithm to get the next proof
-    # proof = blockchain.proof_of_work(blockchain.last_block)
+    
     # # Forge the new Block by adding it to the chain with the proof
     # previous_hash = blockchain.hash(blockchain.last_block)
     # new_block = blockchain.new_block(proof, previous_hash)
-    data = request.get_json()
-    print("data", data)
-    required = ['proof', 'id']
+    # data = request.get_json()
+    # print("data", data)
+    # required = ['proof', 'id']
+    # block_string = json.dumps(blockchain.last_block, sort_keys=True)
 
-    if not all(i in data for i in required):
-        response = {
-            'message': 'data missing'
-        }
-        return jsonify(response), 400
-    else:
-        return jsonify({'message': 'success'}), 200
-    # if data.proof and data.id:
+    # if not all(i in data for i in required):
     #     response = {
-    #         'message': 'Success!'
-    #     }
-    #     return jsonify(response), 200
-    # else:
-    #     response = {
-    #         'message': 'Failure! proof and/or id are not present'
+    #         'message': 'proof and/or id missing'
     #     }
     #     return jsonify(response), 400
-    # response = {
-    #     # TODO: Send a JSON response with the new block
-    #     'block': new_block
-    # }
-
-    # return jsonify(response), 200
+    # else:
+    #     proof = blockchain.valid_proof(block_string, data['proof'])
+    #     if proof is True:
+    #         previous_hash = blockchain.hash(blockchain.last_block)
+    #         blockchain.new_block(data['proof'], previous_hash)
+    #         return jsonify({'message': 'success'}), 200
+    #     else:
+    #         return jsonify({'message': 'invalid proof'}), 400
+            
+    data = request.get_json()
+    # print("data in blockchain: ", data)
+    if not data.get('proof') or not data.get('id'):
+        return jsonify({'message': "Both proof and id are required"})
+    block_string = json.dumps(blockchain.last_block, sort_keys=True)
+    if blockchain.valid_proof(block_string, data['proof']):
+        previous_hash = blockchain.hash(blockchain.last_block)
+        blockchain.new_block(data['proof'], previous_hash)
+        return jsonify({'message': 'success'}), 200
+    else:
+        return jsonify({'message': 'Mining attempt failed'}), 406
 
 
 @app.route('/chain', methods=['GET'])
@@ -175,7 +178,7 @@ def full_chain():
 def last_block_fn():
     the_last_block = blockchain.last_block
     response = {
-        'last block': the_last_block
+        'last_block': the_last_block
     }
     
     return jsonify(response), 200
