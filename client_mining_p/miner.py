@@ -74,7 +74,7 @@ if __name__ == '__main__':
         new_proof = proof_of_work(data.get('last_block'))
         print("proof_of_work finished")
         end_time = time.time()
-        print(f"{end_time - start_time}")
+        print(f"time to find proof: {end_time - start_time}")
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
@@ -94,6 +94,7 @@ if __name__ == '__main__':
         # print the message from the server.
         if str(data['message']) == "success":
             coins += 1
+            print(f"{data['message']}!, {data['block']}")
             print(f"Number of coins: {coins}")
         else:
             print(data.get('message'))

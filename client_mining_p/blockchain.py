@@ -128,30 +128,7 @@ blockchain = Blockchain()
 # @app.route('/mine', methods=['POST', 'GET'])
 @app.route('/mine', methods=['POST'])
 def mine():
-    # Run the proof of work algorithm to get the next proof
-    
-    # # Forge the new Block by adding it to the chain with the proof
-    # previous_hash = blockchain.hash(blockchain.last_block)
-    # new_block = blockchain.new_block(proof, previous_hash)
-    # data = request.get_json()
-    # print("data", data)
-    # required = ['proof', 'id']
-    # block_string = json.dumps(blockchain.last_block, sort_keys=True)
-
-    # if not all(i in data for i in required):
-    #     response = {
-    #         'message': 'proof and/or id missing'
-    #     }
-    #     return jsonify(response), 400
-    # else:
-    #     proof = blockchain.valid_proof(block_string, data['proof'])
-    #     if proof is True:
-    #         previous_hash = blockchain.hash(blockchain.last_block)
-    #         blockchain.new_block(data['proof'], previous_hash)
-    #         return jsonify({'message': 'success'}), 200
-    #     else:
-    #         return jsonify({'message': 'invalid proof'}), 400
-            
+    # Run the proof of work algorithm to get the next proof      
     data = request.get_json()
     # print("data in blockchain: ", data)
     if not data.get('proof') or not data.get('id'):
