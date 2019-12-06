@@ -4,7 +4,7 @@ import './App.css';
 function App() {
   const [state, setState] = useState({
     id: '',
-    balance: 0,
+    balance: null,
     chain: [],
     // transactions: [
     //   {
@@ -25,8 +25,27 @@ function App() {
     })
   }
 
+  const findBalance = () => {
+    let total = 0
+    state.chain.map(b => {
+      b.transactions.map(t => {
+        total += t.amount
+      })
+    })
+    // console.log(total);
+    setState({
+      ...state,
+      balance: total
+    })
+  }
+
   useEffect(() => {
+    // async function getData() {
+    //   const okay = getChain()
+    //   okay && findBalance()
+    // }
     getChain()
+    setTimeout(findBalance(), 2000)
   }, [])
 
   const handleChanges = e => {
@@ -41,9 +60,9 @@ function App() {
     <div className="App">
       <h1>Blockchain</h1>
       <input name="id" placeholder="id" value={state.id} onChange={handleChanges} />
-      {/* <button onClick={setState({...state, id: )}></button> */}
 
       <h3>ID: {state.id}</h3>
+      <button onClick={findBalance}>findBalance</button>
       <h3>balance: {state.balance}</h3>
       <button onClick={getChain}>Re-fetch</button>
       <h3>Chain</h3>
